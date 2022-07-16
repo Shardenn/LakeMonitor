@@ -21,9 +21,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.example.lakes.databinding.ActivityMapsBinding
-import com.example.lakes.environment.Municipality
-import com.example.lakes.environment.MunicipalityResponse
-import com.example.lakes.environment.SykeInterface
+import com.example.lakes.environment.*
 import com.example.lakes.placeholder.PlaceholderContent
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -109,18 +107,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             if (addresses.size > 0)
             {
                 val locality = addresses[0].locality
-                val municInterface = SykeInterface.municipalityService.getMunicipalities(20, "Nimi eq '${locality}'")
-                municInterface.enqueue(object: Callback<MunicipalityResponse> {
-                        override fun onFailure(call: Call<MunicipalityResponse>?, t: Throwable) {
+                val lakeInterface = SykeInterface.lakeService.getLakes(50, "KuntaNimi eq '${locality}'")
+                lakeInterface.enqueue(object: Callback<LakeResponse> {
+                        override fun onFailure(call: Call<LakeResponse>?, t: Throwable) {
                             t.printStackTrace()
                         }
-                        override fun onResponse(call: Call<MunicipalityResponse>, response: Response<MunicipalityResponse>) {
+                        override fun onResponse(call: Call<LakeResponse>, response: Response<LakeResponse>) {
                             if (response.body() == null) return
                             supportFragmentManager.commit {
                                 setReorderingAllowed(true)
                                 add<SuggestedLake>(R.id.fragment_suggested_lakes, "Suggested lakes list")
                             }
-                            addMunicipalities(response.body()!!.value)
+                            addLakes(response.body()!!.value)
                             findViewById<Button>(R.id.btn_closeSuggestions).visibility = View.VISIBLE
                         }
                     })
@@ -131,12 +129,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         }
     }
 
-    private fun addMunicipalities(municipalities: List<Municipality>) {
-        for (i in 0..municipalities.size - 1) {
+    private fun addLakes(lakes: List<Lake>) {
+        for (i in lakes.indices) {
             PlaceholderContent.addItem(PlaceholderContent.PlaceholderItem(
-                municipalities[i].Kunta_Id.toString(),
-                municipalities[i].Nimi,
-                municipalities[i].YmpVastuuEly_Id.toString()))
+                lakes[i].Jarvi_Id.toString(),
+                lakes[i].Nimi,
+                lakes[i].KuntaNimi)
+            )
         }
     }
 

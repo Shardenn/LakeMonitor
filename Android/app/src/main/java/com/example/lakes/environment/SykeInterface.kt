@@ -1,14 +1,19 @@
 package com.example.lakes.environment
 
-import android.content.res.Resources
-import com.example.lakes.R
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 object SykeInterface {
-    var municipalityService: MunicipalityService = Retrofit.Builder().
-        baseUrl("http://rajapinnat.ymparisto.fi/")
+    val baseUrl = "http://rajapinnat.ymparisto.fi/"
+    var municipalityService: MunicipalityService = Retrofit.Builder()
+        .baseUrl(baseUrl)
         .addConverterFactory(MoshiConverterFactory.create())
         .build()
         .create(MunicipalityService::class.java)
+
+    var lakeService: LakeService = Retrofit.Builder()
+        .baseUrl(baseUrl)
+        .addConverterFactory(MoshiConverterFactory.create())
+        .build()
+        .create(LakeService::class.java)
 }
