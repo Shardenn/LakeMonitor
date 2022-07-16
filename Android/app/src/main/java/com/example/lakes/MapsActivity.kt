@@ -1,12 +1,13 @@
 package com.example.lakes
 
-import android.content.Intent
 import android.location.Geocoder
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.PersistableBundle
+import android.view.View
+import android.widget.Button
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
 import androidx.recyclerview.widget.RecyclerView
@@ -20,12 +21,18 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.example.lakes.databinding.ActivityMapsBinding
+import com.example.lakes.environment.Municipality
+import com.example.lakes.environment.MunicipalityResponse
+import com.example.lakes.environment.SykeInterface
 import com.example.lakes.placeholder.PlaceholderContent
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapClickListener {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapClickListener, View.OnClickListener {
 
     private lateinit var mMap: GoogleMap
     private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
@@ -66,6 +73,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         mapFragment.getMapAsync(this)
 
         mSuggestedLakes.clear()
+
+        findViewById<Button>(R.id.btn_closeSuggestions).visibility = View.INVISIBLE
+        findViewById<Button>(R.id.btn_closeSuggestions).setOnClickListener(this)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -95,24 +105,53 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
 
     override fun onMapClick(coords: LatLng) {
         try {
-            var addresses = mGeocoder.getFromLocation(coords.latitude, coords.longitude, 1)
+            val addresses = mGeocoder.getFromLocation(coords.latitude, coords.longitude, 1)
             if (addresses.size > 0)
             {
-                Toast.makeText(this, addresses[0].locality, Toast.LENGTH_LONG).show()
-                supportFragmentManager.commit {
-                    setReorderingAllowed(true)
-                    add<SuggestedLake>(R.id.fragment_suggested_lakes, "Suggested lakes list")
-                }
-                addLakes()
+                val locality = addresses[0].locality
+                val municInterface = SykeInterface.municipalityService.getMunicipalities(20, "Nimi eq '${locality}'")
+                municInterface.enqueue(object: Callback<MunicipalityResponse> {
+                        override fun onFailure(call: Call<MunicipalityResponse>?, t: Throwable) {
+                            t.printStackTrace()
+                        }
+                        override fun onResponse(call: Call<MunicipalityResponse>, response: Response<MunicipalityResponse>) {
+                            if (response.body() == null) return
+                            supportFragmentManager.commit {
+                                setReorderingAllowed(true)
+                                add<SuggestedLake>(R.id.fragment_suggested_lakes, "Suggested lakes list")
+                            }
+                            addMunicipalities(response.body()!!.value)
+                            findViewById<Button>(R.id.btn_closeSuggestions).visibility = View.VISIBLE
+                        }
+                    })
+
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun addLakes() {
-        PlaceholderContent.addItem(PlaceholderContent.PlaceholderItem("789", "Turujarvi", "Turku"))
-        PlaceholderContent.addItem(PlaceholderContent.PlaceholderItem("123", "Jarvi", "Lahti"))
-        PlaceholderContent.addItem(PlaceholderContent.PlaceholderItem("456", "Lauttaa", "Helsinki"))
+    private fun addMunicipalities(municipalities: List<Municipality>) {
+        for (i in 0..municipalities.size - 1) {
+            PlaceholderContent.addItem(PlaceholderContent.PlaceholderItem(
+                municipalities[i].Kunta_Id.toString(),
+                municipalities[i].Nimi,
+                municipalities[i].YmpVastuuEly_Id.toString()))
+        }
+    }
+
+    override fun onClick(view: View?) {
+        when (view?.id) {
+            R.id.btn_closeSuggestions -> {
+                findViewById<Button>(R.id.btn_closeSuggestions).visibility = View.INVISIBLE
+                val lakesList: Fragment? = supportFragmentManager.findFragmentByTag("Suggested lakes list")
+                if (lakesList != null) {
+                    supportFragmentManager.commit {
+                        remove(lakesList)
+                    }
+                    PlaceholderContent.clear()
+                }
+            }
+        }
     }
 }

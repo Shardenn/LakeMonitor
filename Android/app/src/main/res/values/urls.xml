@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="base_syke_url">http://rajapinnat.ymparisto.fi/api/</string>
+    <string name="municipality_url">hakemistorajapinta/1.0/odata</string>
+</resources>
