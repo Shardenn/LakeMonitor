@@ -1,11 +1,15 @@
 package com.example.lakes
 
+import android.content.Intent
 import android.location.Geocoder
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.widget.Toast
+import androidx.fragment.app.add
+import androidx.fragment.app.commit
+import androidx.recyclerview.widget.RecyclerView
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -16,6 +20,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.example.lakes.databinding.ActivityMapsBinding
+import com.example.lakes.placeholder.PlaceholderContent
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
@@ -35,15 +40,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     private val mDefaultLocation = LatLng(60.984332, 25.660406) // Lahti center
     private var mLocationPermissionGranted = false
 
-    private val KEY_LAST_LOCATION: String = applicationContext.getString(R.string.KEY_LAST_LOCATION)
-    private val KEY_CAMERA_POSITION: String = applicationContext.getString(R.string.KEY_CAMERA_POSITION)
+    private val mSuggestedLakes = mutableListOf<PlaceholderContent.PlaceholderItem>()
+    private lateinit var mRecyclerView: RecyclerView
+    private lateinit var mLakesAdapter: SuggestedLakeRecyclerViewAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         if (savedInstanceState != null) {
-            mLastKnownLocation = savedInstanceState.getParcelable(KEY_LAST_LOCATION)
-            mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION)
+            mLastKnownLocation = savedInstanceState.getParcelable(applicationContext.getString(R.string.KEY_LAST_LOCATION))
+            mCameraPosition = savedInstanceState.getParcelable(applicationContext.getString(R.string.KEY_CAMERA_POSITION))
         }
         mMapBinding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(mMapBinding.root)
@@ -58,12 +64,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        mSuggestedLakes.clear()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        mMap?.let { mMap ->
-            outState.putParcelable(KEY_CAMERA_POSITION, mMap.cameraPosition)
-            outState.putParcelable(KEY_LAST_LOCATION, mLastKnownLocation)
+        mMap.let { mMap ->
+            outState.putParcelable(applicationContext.getString(R.string.KEY_CAMERA_POSITION), mMap.cameraPosition)
+            outState.putParcelable(applicationContext.getString(R.string.KEY_LAST_LOCATION), mLastKnownLocation)
         }
         super.onSaveInstanceState(outState)
     }
@@ -91,9 +99,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             if (addresses.size > 0)
             {
                 Toast.makeText(this, addresses[0].locality, Toast.LENGTH_LONG).show()
+                supportFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    add<SuggestedLake>(R.id.fragment_suggested_lakes, "Suggested lakes list")
+                }
+                addLakes()
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    private fun addLakes() {
+        PlaceholderContent.addItem(PlaceholderContent.PlaceholderItem("789", "Turujarvi", "Turku"))
+        PlaceholderContent.addItem(PlaceholderContent.PlaceholderItem("123", "Jarvi", "Lahti"))
+        PlaceholderContent.addItem(PlaceholderContent.PlaceholderItem("456", "Lauttaa", "Helsinki"))
     }
 }

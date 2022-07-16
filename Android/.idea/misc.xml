@@ -3,7 +3,13 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Projects/lake/Android/app/src/main/res/layout/activity_maps.xml" value="0.136226034308779" />
+        <entry key="..\:/Projects/lake/Android/app/src/main/res/layout/activity_maps.xml" value="0.33" />
+        <entry key="..\:/Projects/lake/Android/app/src/main/res/layout/fragment_suggested_lake.xml" value="0.45063405797101447" />
+        <entry key="..\:/Projects/lake/Android/app/src/main/res/layout/fragment_suggested_lake_list.xml" value="0.45063405797101447" />
+        <entry key="..\:/Projects/lake/Android/app/src/main/res/layout/fragment_suggested_lakes_list.xml" value="0.45063405797101447" />
+        <entry key="..\:/Projects/lake/Android/app/src/main/res/layout/lake_card.xml" value="0.4282051282051282" />
+        <entry key="..\:/Projects/lake/Android/app/src/main/res/layout/main_layout.xml" value="0.45063405797101447" />
+        <entry key="..\:/Projects/lake/Android/app/src/main/res/layout/suggested_lake_item.xml" value="0.45063405797101447" />
       </map>
     </option>
   </component>
