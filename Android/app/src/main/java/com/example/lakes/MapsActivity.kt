@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
@@ -107,7 +106,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             if (addresses.size > 0)
             {
                 val locality = addresses[0].locality
-                val lakeInterface = SykeInterface.lakeService.getLakes(50, "KuntaNimi eq '${locality}'")
+                val lakeInterface = SykeInterface.lakeService.getLakes(20, "KuntaNimi eq '${locality}'")
                 lakeInterface.enqueue(object: Callback<LakeResponse> {
                         override fun onFailure(call: Call<LakeResponse>?, t: Throwable) {
                             t.printStackTrace()
@@ -132,9 +131,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     private fun addLakes(lakes: List<Lake>) {
         for (i in lakes.indices) {
             PlaceholderContent.addItem(PlaceholderContent.PlaceholderItem(
-                lakes[i].Jarvi_Id.toString(),
-                lakes[i].Nimi,
-                lakes[i].KuntaNimi)
+                lakes[i].id.toString(),
+                lakes[i].name,
+                lakes[i].municipalityName,
+                null)
             )
         }
     }

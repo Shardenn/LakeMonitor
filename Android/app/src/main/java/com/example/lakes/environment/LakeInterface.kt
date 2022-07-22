@@ -4,6 +4,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 data class LakeResponse(val value: List<Lake>)
+data class LakePointsResponse(val value: List<LakePoint>)
 
 interface LakeService{
     @GET("/api/jarvirajapinta/1.0/odata/Jarvi")
@@ -11,4 +12,8 @@ interface LakeService{
         @Query("\$top", encoded = true) resultsCount: Int,
         @Query("\$filter", encoded = true) filter: String) : Call<LakeResponse>
 
+    @GET("/api/Hydrologiarajapinta/1.1/odata/Paikka")
+    fun getLakePoints(
+        @Query("\$top") resultsCount: Int,
+        @Query("\$filter") filter: String) : Call<LakePointsResponse>
 }
