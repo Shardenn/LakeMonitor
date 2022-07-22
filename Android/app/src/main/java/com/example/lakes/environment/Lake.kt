@@ -1,7 +1,9 @@
 package com.example.lakes.environment
 
+import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.RequiresApi
 import com.squareup.moshi.Json
 
 data class Lake(
@@ -87,6 +89,39 @@ data class LakePoint(
         }
 
         override fun newArray(size: Int): Array<LakePoint?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
+
+data class MeasuredTemperature(
+    @field:Json(name = "Aika") val dateTime: String?,
+    @field:Json(name = "Arvo") val value: Float,
+    @field:Json(name = "Place_Id") val id_place: Int
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString(),
+        parcel.readFloat(),
+        parcel.readInt()) {
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(dateTime)
+        parcel.writeFloat(value)
+        parcel.writeInt(id_place)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<MeasuredTemperature> {
+        override fun createFromParcel(parcel: Parcel): MeasuredTemperature {
+            return MeasuredTemperature(parcel)
+        }
+
+        override fun newArray(size: Int): Array<MeasuredTemperature?> {
             return arrayOfNulls(size)
         }
     }
